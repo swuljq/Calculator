@@ -1,1 +1,1 @@
-# Super-calculator
+# Calculator
