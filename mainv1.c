@@ -51,8 +51,7 @@ double calculate(const char *operation, double a, double b)
     }
 }
 // HTTP请求处理函数
-static void handle_request(struct mg_connection *c, int ev, void *ev_data)
-{
+static void handle_request(struct mg_connection *c, int ev, void *ev_data) {
     if (ev == MG_EV_HTTP_MSG) {
         struct mg_http_message *hm = (struct mg_http_message *) ev_data;
 
@@ -98,8 +97,7 @@ static void handle_request(struct mg_connection *c, int ev, void *ev_data)
     }
 }
 
-int main(void) 
-{
+int main(void) {
     struct mg_mgr mgr;
     mg_mgr_init(&mgr);
 
