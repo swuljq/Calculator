@@ -66,8 +66,16 @@ static void handle_request(struct mg_connection *c, int ev, void *ev_data)
             // 解析JSON
             cJSON *json = cJSON_Parse(body);
             free(body);
-            if (!json) {
-                mg_http_reply(c, 400, "", "Invalid JSON\n");
+            if (!json) 
+            {
+                cJSON *res = cJSON_CreateObject();
+                cJSON_AddBoolToObject(res, "success", 0);
+                cJSON_AddNullToObject(res, "result");
+                cJSON_AddStringToObject(res, "error", "Invalid JSON format");
+                char *res_str = cJSON_PrintUnformatted(res);
+                mg_http_reply(c, 400, "Content-Type: application/json\r\n", "%s", res_str);
+                free(res_str);
+                cJSON_Delete(res);
                 return;
             }
 
@@ -75,8 +83,16 @@ static void handle_request(struct mg_connection *c, int ev, void *ev_data)
             cJSON *a = cJSON_GetObjectItem(json, "a");
             cJSON *b = cJSON_GetObjectItem(json, "b");
 
-            if (!cJSON_IsString(op) || !cJSON_IsNumber(a) || !cJSON_IsNumber(b)) {
-                mg_http_reply(c, 400, "", "Invalid parameters\n");
+            if (!cJSON_IsString(op) || !cJSON_IsNumber(a) || !cJSON_IsNumber(b)) 
+            {
+                cJSON *res = cJSON_CreateObject();
+                cJSON_AddBoolToObject(res, "success", 0);
+                cJSON_AddNullToObject(res, "result");
+                cJSON_AddStringToObject(res, "error", "Missing or invalid parameters");
+                char *res_str = cJSON_PrintUnformatted(res);
+                mg_http_reply(c, 400, "Content-Type: application/json\r\n", "%s", res_str);
+                free(res_str);
+                cJSON_Delete(res);
                 cJSON_Delete(json);
                 return;
             }
@@ -86,13 +102,17 @@ static void handle_request(struct mg_connection *c, int ev, void *ev_data)
 
             // 返回结果JSON
             cJSON *res_json = cJSON_CreateObject();
+             cJSON_AddBoolToObject(res_json, "success", 1);
             cJSON_AddNumberToObject(res_json, "result", result);
+            cJSON_AddNullToObject(res_json, "error");
             char *res_str = cJSON_PrintUnformatted(res_json);
             cJSON_Delete(res_json);
 
             mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", res_str);
             free(res_str);
-        } else {
+        } 
+        else 
+        {
             mg_http_reply(c, 404, "", "Not Found\n");
         }
     }
