@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>超级计算器</title>
+</head>
+<body>
+    <h2>超级计算器</h2>
+    <form method="post" th:action="@{/calculate}">
+        <input type="text" name="expression" placeholder="请输入表达式，如 sin(30)" required>
+        <button type="submit">计算</button>
+    </form>
+    <p th:if="${result != null}">结果：<span th:text="${result}"></span></p>
+    <p th:if="${error != null}" style="color:red;">错误：<span th:text="${error}"></span></p>
+</body>
+</html>
