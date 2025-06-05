@@ -1,16 +1,121 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <title>超级计算器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f7f7f7;
+            border-radius: 8px;
+            box-shadow: 0 0 10px #ccc;
+        }
+
+        input[type=text] {
+            width: 100%;
+            font-size: 24px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+
+        .top-buttons, .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .buttons button, .top-buttons button {
+            padding: 15px;
+            font-size: 18px;
+            border: none;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .buttons button:hover, .top-buttons button:hover {
+            background-color: #2980b9;
+        }
+
+        .result, .error {
+            margin-top: 15px;
+            font-size: 18px;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
 </head>
 <body>
-    <h2>超级计算器</h2>
-    <form method="post" th:action="@{/calculate}">
-        <input type="text" name="expression" placeholder="请输入表达式，如 sin(30)" required>
-        <button type="submit">计算</button>
-    </form>
-    <p th:if="${result != null}">结果：<span th:text="${result}"></span></p>
-    <p th:if="${error != null}" style="color:red;">错误：<span th:text="${error}"></span></p>
+<h2>超级计算器</h2>
+<form method="post" th:action="@{/calculate}">
+    <input type="text" id="expression" name="expression" placeholder="请输入表达式，如 sin(30)" required>
+
+    <div class="top-buttons">
+        <button type="button" onclick="append('sin(')">sin</button>
+        <button type="button" onclick="append('cos(')">cos</button>
+        <button type="button" onclick="append('tan(')">tan</button>
+        <button type="button" onclick="append('^')">^</button>
+    </div>
+
+    <div class="buttons">
+        <button type="button" onclick="append('7')">7</button>
+        <button type="button" onclick="append('8')">8</button>
+        <button type="button" onclick="append('9')">9</button>
+        <button type="button" onclick="append('/')">÷</button>
+
+        <button type="button" onclick="append('4')">4</button>
+        <button type="button" onclick="append('5')">5</button>
+        <button type="button" onclick="append('6')">6</button>
+        <button type="button" onclick="append('*')">×</button>
+
+        <button type="button" onclick="append('1')">1</button>
+        <button type="button" onclick="append('2')">2</button>
+        <button type="button" onclick="append('3')">3</button>
+        <button type="button" onclick="append('-')">-</button>
+
+        <button type="button" onclick="append('0')">0</button>
+        <button type="button" onclick="append('.')">.</button>
+        <button type="submit">=</button>
+        <button type="button" onclick="append('+')">+</button>
+
+        <button type="button" onclick="append('(')">(</button>
+        <button type="button" onclick="append(')')">)</button>
+        <button type="button" onclick="clearInput()">C</button>
+        <button type="button" onclick="delChar()">←</button>
+    </div>
+</form>
+
+<p class="result" th:if="${result != null}">结果：<span th:text="${result}"></span></p>
+<p class="error" th:if="${error != null}">错误：<span th:text="${error}"></span></p>
+
+<script>
+    const input = document.getElementById('expression');
+
+    function append(val) {
+        input.value += val;
+    }
+
+    function clearInput() {
+        input.value = '';
+    }
+
+    function delChar() {
+        input.value = input.value.slice(0, -1);
+    }
+
+    input.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            this.form.submit();
+        }
+    });
+</script>
 </body>
 </html>
