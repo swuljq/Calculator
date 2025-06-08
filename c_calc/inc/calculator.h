@@ -4,21 +4,13 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-// 基本运算
-double add(double a, double b);
-double subtract(double a, double b);
-double multiply(double a, double b);
-double divide(double a, double b);
+#include "cJSON.h"
+#define STACK_MAX 256
+#define MATH_ERR_DIV_ZERO -1
+#define MATH_ERR_NEG_SQRT -2
 
-// 三角函数（角度制）
-double sine(double degree);
-double cosine(double degree);
-double tangent(double degree);
-
-// 指数与开方
-double exponential(double x);    
-double square(double x);          
-double square_root(double x);     
+double calculate(const char *operation, double a, double b);
+int GetResult(cJSON *json_expr, double *result);
 
 #endif 
 
