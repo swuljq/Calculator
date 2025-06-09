@@ -3,6 +3,8 @@
 #include "mongoose.h"
 #include "cJSON.h"
 
+double result = 0.0;
+char error_msg[128] = {0};
 
 // HTTP请求处理函数
 static void handle_request(struct mg_connection *c, int ev, void *ev_data) 
@@ -51,21 +53,33 @@ static void handle_request(struct mg_connection *c, int ev, void *ev_data)
                 cJSON_Delete(json);
                 return;
             }
-            
             // 计算后缀表达式结果
-            double result = 0.0;
-            GetResult(expr, &result);
-             // 构造成功响应 JSON包
-            cJSON *res = cJSON_CreateObject();
-            cJSON_AddBoolToObject(res, "success", 1);
-            cJSON_AddNumberToObject(res, "result", result);
-            cJSON_AddNullToObject(res, "error");
+            if (GetResult(expr, &result, error_msg)) 
+            {
+                // 成功，构造成功响应
+                cJSON *res = cJSON_CreateObject();
+                cJSON_AddBoolToObject(res, "success", 1);
+                cJSON_AddNumberToObject(res, "result", result);
+                cJSON_AddNullToObject(res, "error");
 
-            char *res_str = cJSON_PrintUnformatted(res);
-            mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", res_str);
-            free(res_str);
-            cJSON_Delete(res);
-            cJSON_Delete(json);
+                char *res_str = cJSON_PrintUnformatted(res);
+                mg_http_reply(c, 200, "Content-Type: application/json\r\n", "%s", res_str);
+                free(res_str);
+                cJSON_Delete(res);
+            } 
+            else 
+            {
+                // 失败，构造失败响应
+                cJSON *res = cJSON_CreateObject();
+                cJSON_AddBoolToObject(res, "success", 0);
+                cJSON_AddNullToObject(res, "result");
+                cJSON_AddStringToObject(res, "error", error_msg);
+
+                char *res_str = cJSON_PrintUnformatted(res);
+                mg_http_reply(c, 400, "Content-Type: application/json\r\n", "%s", res_str);
+                free(res_str);
+                cJSON_Delete(res);
+            }
         } 
         else 
         {
