@@ -3,54 +3,80 @@
 #include <math.h>
 #include "calculator.h"
 
-double calculate(const char *operation, double a, double b) 
+int calculate(const char *operation, double a, double b, double *res, char *error_msg) 
 {
     if (strcmp(operation, "+") == 0 )
     {
-        return a + b;
+        *res = a + b;
+        return 1;
     }
     else if (strcmp(operation, "-") == 0 ) 
     {
-        return a - b;
+        *res = a - b;
+        return 1;
     }
     else if (strcmp(operation, "*") == 0 ) 
     {
-        return a * b;
+        *res = a * b;
+        return 1;
     }
     else if (strcmp(operation, "/") == 0 ) 
     {
-        return a / b;
+        if (b == 0) 
+        {
+            strcpy(error_msg, "Division by zero");
+            return 0;
+        }
+       *res = a / b;
+       return 1;
     }
     else if (strcmp(operation, "sin") == 0) 
     {
-        return sin(a * M_PI / 180.0);
+        *res = sin(a * M_PI / 180.0);
+        return 1;
     }
     else if (strcmp(operation, "cos") == 0) 
     {
-        return cos(a * M_PI / 180.0);
+        *res = cos(a * M_PI / 180.0);
+        return 1;
     }
     else if (strcmp(operation, "tan") == 0)
     {
-        return tan(a * M_PI / 180.0);
+        *res = tan(a * M_PI / 180.0);
+        return 1;
     }
     else if (strcmp(operation, "exp") == 0) 
     {
-        return exp(a);
+        *res = exp(a);
+        return 1;
     }
     else if (strcmp(operation, "sqr") == 0) 
     {
-        return a * a;
+        *res = a * a;
+        return 1;
     }
     else if (strcmp(operation, "sqrt") == 0) 
     {
-        return sqrt(a);
+        if (a < 0) 
+        {
+            strcpy(error_msg, "The square root is negative");
+            return 0;
+        }
+        *res = sqrt(a);
+        return 1;
     }
     else if (strcmp(operation, "^") == 0) 
     {
-        return pow(a, b);
+        if (a < 0 && floor(b) != b)
+        {
+            strcpy(error_msg, "negative base with non-integer exponent");
+            return 0;            
+        }
+        *res = pow(a, b);
+        return 1;
     }
     else {
-        printf("Unknown operation: %s\n", operation);
+        strcpy(error_msg, "Unknown operation");
         return 0;
     }
 }
@@ -95,9 +121,10 @@ static int stack_pop(Stack *s, double *val)
  * 
  * @param json_expr 后缀表达式数组，元素是数字和操作符
  * @param result 计算结果输出指针
- * @return  MATH_ERR_DIV_ZERO 表示除0错误，MATH_ERR_NEG_SQRT 表示根号下为负数错误
+ * @param error_msg 存储错误信息
+ * @return  0表示计算错误，1表示计算成功
  */
-int GetResult(cJSON *json_expr, double *result) 
+int GetResult(cJSON *json_expr, double *result, char *error_msg) 
 {
     Stack stack;
     stack_init(&stack);
@@ -124,7 +151,10 @@ int GetResult(cJSON *json_expr, double *result)
                 strcmp(op, "exp") == 0 || strcmp(op, "sqr") == 0) 
             {
                 stack_pop(&stack, &a);
-                res = calculate(op, a, 0); // 调用计算函数，第二参数无效
+                if (!calculate(op, a, 0, &res, error_msg))
+                {
+                    return 0;
+                }
                 stack_push(&stack, res); 
             }
             // 双目运算符（如 +, -, *, /, ^ 等） 
@@ -132,10 +162,14 @@ int GetResult(cJSON *json_expr, double *result)
             {
                 stack_pop(&stack, &b);
                 stack_pop(&stack, &a);
-                res = calculate(op, a, b);
+                if (!calculate(op, a, b, &res, error_msg)) 
+                {
+                    return 0;
+                }
                 stack_push(&stack, res);
             }
         }
     }
     *result = stack.stack[stack.top];
+    return 1;
 }

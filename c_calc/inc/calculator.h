@@ -6,11 +6,10 @@
 #endif
 #include "cJSON.h"
 #define STACK_MAX 256
-#define MATH_ERR_DIV_ZERO -1
-#define MATH_ERR_NEG_SQRT -2
 
-double calculate(const char *operation, double a, double b);
-int GetResult(cJSON *json_expr, double *result);
+
+int calculate(const char *operation, double a, double b, double *res, char *error_msg);
+int GetResult(cJSON *json_expr, double *result, char *error_msg);
 
 #endif 
 
