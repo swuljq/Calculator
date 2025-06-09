@@ -94,16 +94,15 @@ def infix_to_rpn(expression):
 
 
 def send_to_server(data):
-    """发送数据到C语言计算端并接收结果"""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.connect((SERVER_HOST, SERVER_PORT))
-            s.sendall(json.dumps(data))
-            response = s.recv(1024)
-            return json.loads(response)
-        except Exception as e:
-            return {'error': f'服务端通信错误'}
-
+    try:
+        url = f"http://192.168.43.130:8000/calc"  # 根路径 POST
+        headers = {"Content-Type": "application/json"}
+        print(url)
+        response = requests.post(url, json=data, headers=headers, timeout=5)
+        print(response.status_code)
+        return response.json()
+    except Exception as e:
+        return {'success': False, 'error': '服务端通信错误', 'result': None}
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
@@ -123,11 +122,14 @@ def calculate():
         # 转发到C计算端
         result = send_to_server({"expression": rpn})
 
-        # 返回结果
-        if 'null' in result['result']:
-            return jsonify({"error": result['error']})
+        if result.get('success'):
+            # 计算成功，获取结果
+            value = result.get('result')
+            return jsonify({"result": value})
         else:
-            return jsonify({"result": result['result']})
+            # 计算失败，返回错误信息
+            error_msg = result.get('error', '未知错误')
+            return jsonify({"error": error_msg})
 
     except Exception as e:
         return jsonify({'error': f'处理请求时出错'})
