@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify
 import re
-import math
+import socket
+import json
 
 app = Flask(__name__)
-SERVER_HOST = 'localhost'
-SERVER_PORT = 8090
+SERVER_HOST = '192.168.162.179'
+SERVER_PORT = 8000
 
 
 def convert_if_number(s):
@@ -15,7 +16,6 @@ def convert_if_number(s):
             return float(s)  # 失败则尝试转浮点数
         except ValueError:
             return s  # 仍然失败，则返回原字符串
-
 
 
 def is_valid_expression(expr):
@@ -87,34 +87,50 @@ def infix_to_rpn(expression):
     for i in range(len(elements)):
         elements[i] = convert_if_number(elements[i])
         if elements[i] == '~':
-            elements[i-1] = -elements[i-1]
+            elements[i - 1] = -elements[i - 1]
 
     rpn = list(filter(lambda x: x != '~', elements))
     return rpn
 
 
+def send_to_server(data):
+    """发送数据到C语言计算端并接收结果"""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.connect((SERVER_HOST, SERVER_PORT))
+            s.sendall(json.dumps(data))
+            response = s.recv(1024)
+            return json.loads(response)
+        except Exception as e:
+            return {'error': f'服务端通信错误'}
 
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
-    data = request.get_json()
-    if not data or 'expression' not in data:
-        return jsonify({"error": "Invalid JSON format"}), 400
+    try:
+        data = request.get_json()
 
-    original_expr = data['expression']
-    print(original_expr)
+        if not data or 'expression' not in data:
+            return jsonify({"error": "Invalid JSON format"})
 
+        original_expr = data['expression']
 
-       # if not is_valid_expression(expr):
-        #    print('abc')
-         #   return jsonify({"error": "Invalid expression (unmatched parentheses)"}), 400
+        if not is_valid_expression(original_expr):
+            return jsonify({"error": "Invalid expression (括号不匹配)"})
 
-    rpn = infix_to_rpn(original_expr)
+        rpn = infix_to_rpn(original_expr)
 
-    print({"error": rpn})
-    return jsonify({"error": rpn}), 400
+        # 转发到C计算端
+        result = send_to_server({"expression": rpn})
 
+        # 返回结果
+        if 'null' in result['result']:
+            return jsonify({"error": result['error']})
+        else:
+            return jsonify({"result": result['result']})
 
+    except Exception as e:
+        return jsonify({'error': f'处理请求时出错'})
 
 
 if __name__ == '__main__':
