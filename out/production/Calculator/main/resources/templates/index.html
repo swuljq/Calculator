@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>超级计算器</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #d7e1ec, #f1f7fc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .calculator {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            width: 350px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #34495e;
+        }
+
+        input[type=text] {
+            width: 100%;
+            font-size: 24px;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #bdc3c7;
+            border-radius: 10px;
+            box-sizing: border-box;
+        }
+
+        .top-buttons, .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .buttons button, .top-buttons button {
+            padding: 15px;
+            font-size: 18px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .buttons button:hover, .top-buttons button:hover {
+            background-color: #2980b9;
+        }
+
+        .result, .error {
+            text-align: center;
+            font-size: 18px;
+            margin-top: 10px;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .result {
+            color: #2ecc71;
+        }
+    </style>
+</head>
+<body>
+<div class="calculator">
+    <h2>Calculator</h2>
+    <form method="post" th:action="@{/calculate}">
+        <input type="text" id="expression" name="expression" placeholder="请输入表达式，如 sin(30)" required>
+
+        <div class="top-buttons">
+            <button type="button" onclick="append('sin(')">sin</button>
+            <button type="button" onclick="append('cos(')">cos</button>
+            <button type="button" onclick="append('tan(')">tan</button>
+            <button type="button" onclick="append('^')">^</button>
+        </div>
+
+        <div class="buttons">
+            <button type="button" onclick="append('7')">7</button>
+            <button type="button" onclick="append('8')">8</button>
+            <button type="button" onclick="append('9')">9</button>
+            <button type="button" onclick="append('/')">÷</button>
+
+            <button type="button" onclick="append('4')">4</button>
+            <button type="button" onclick="append('5')">5</button>
+            <button type="button" onclick="append('6')">6</button>
+            <button type="button" onclick="append('*')">×</button>
+
+            <button type="button" onclick="append('1')">1</button>
+            <button type="button" onclick="append('2')">2</button>
+            <button type="button" onclick="append('3')">3</button>
+            <button type="button" onclick="append('-')">-</button>
+
+            <button type="button" onclick="append('0')">0</button>
+            <button type="button" onclick="append('.')">.</button>
+            <button type="submit">=</button>
+            <button type="button" onclick="append('+')">+</button>
+
+            <button type="button" onclick="append('(')">(</button>
+            <button type="button" onclick="append(')')">)</button>
+            <button type="button" onclick="clearInput()">C</button>
+            <button type="button" onclick="delChar()">←</button>
+        </div>
+    </form>
+
+    <p class="result" th:if="${result != null}">结果：<span th:text="${result}"></span></p>
+    <p class="error" th:if="${error != null}">错误：<span th:text="${error}"></span></p>
+</div>
+
+<script>
+    const input = document.getElementById('expression');
+
+    function append(val) {
+        input.value += val;
+    }
+
+    function clearInput() {
+        input.value = '';
+    }
+
+    function delChar() {
+        input.value = input.value.slice(0, -1);
+    }
+
+    input.addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            this.form.submit();
+        }
+    });
+</script>
+</body>
+</html>
