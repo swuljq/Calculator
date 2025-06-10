@@ -135,6 +135,35 @@
         input.value = input.value.slice(0, -1);
     }
 
+    // 提交表单时通过AJAX请求计算
+    document.querySelector('form').addEventListener('submit', function(event) {
+        event.preventDefault(); // 阻止表单提交
+
+        const expression = input.value;
+
+        // 使用fetch发送请求
+        fetch('/calculate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({ expression })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.result) {
+                // 将结果填充到输入框中
+                input.value = data.result;
+            } else {
+                // 显示错误信息
+                alert('错误：' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('请求失败，请稍后再试！');
+        });
+    });
+
     input.addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
             this.form.submit();
