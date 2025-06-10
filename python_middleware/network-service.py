@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import re
 import socket
 import json
+import requests
 
 app = Flask(__name__)
 SERVER_HOST = '192.168.162.179'
@@ -35,7 +36,7 @@ def infix_to_rpn(expression):
     """将中缀表达式转换为逆波兰表示法（RPN）"""
     # 定义运算符优先级
     precedence = {'u-': 6,
-                  'sin': 5, 'cos': 5, 'tan': 5,  # 三角函数最高优先级
+                  'sin': 5, 'cos': 5, 'tan': 5,  
                   '^': 4,
                   '*': 3, '/': 3,
                   '+': 2, '-': 2,
@@ -92,10 +93,50 @@ def infix_to_rpn(expression):
     rpn = list(filter(lambda x: x != '~', elements))
     return rpn
 
+def is_syntax_valid(expr):
+    expr = expr.replace(' ', '')  # 去除空格
+    if not expr:
+        return False
+
+    # 合法字符（数字、字母、运算符、括号）
+    valid_chars = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+-*/^()."
+    for ch in expr:
+        if ch not in valid_chars:
+            return False
+
+    operators = set("+-*/^")
+    prev_char = ''
+    for i, ch in enumerate(expr):
+        # 表达式不能以运算符（除了负号）开头
+        if i == 0 and ch in "*/^":
+            return False
+        # 连续两个运算符不合法，负号除外（负号可能是一元）
+        if ch in operators:
+            if prev_char in operators:
+                # 允许 '-' 作为负号，只要不是连续两个非 '-' 运算符
+                if not (ch == '-' and prev_char != '-'):
+                    return False
+        # 运算符后面不能直接跟右括号
+        if prev_char in operators and ch == ')':
+            return False
+        # 左括号后面不能直接跟运算符（除了负号和左括号）
+        if prev_char == '(' and ch in "*/^+)":
+            return False
+        # 右括号后面不能直接跟数字或字母
+        if prev_char == ')' and (ch.isalnum() or ch == '('):
+            return False
+        prev_char = ch
+
+    # 表达式不能以运算符结尾
+    if expr[-1] in operators:
+        return False
+
+    return True
+
 
 def send_to_server(data):
     try:
-        url = f"http://192.168.43.130:8000/calc"  # 根路径 POST
+        url = f"http://{SERVER_HOST}:{SERVER_PORT}/calc"  # 根路径 POST
         headers = {"Content-Type": "application/json"}
         print(url)
         response = requests.post(url, json=data, headers=headers, timeout=5)
@@ -112,16 +153,21 @@ def calculate():
         if not data or 'expression' not in data:
             return jsonify({"error": "Invalid JSON format"})
 
+
         original_expr = data['expression']
 
         if not is_valid_expression(original_expr):
             return jsonify({"error": "Invalid expression (括号不匹配)"})
 
+        if not is_syntax_valid(original_expr):
+            return jsonify({"error": "Invalid expression syntax (语法错误)"})
+
+
         rpn = infix_to_rpn(original_expr)
 
         # 转发到C计算端
         result = send_to_server({"expression": rpn})
-
+ 
         if result.get('success'):
             # 计算成功，获取结果
             value = result.get('result')
