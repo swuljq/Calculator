@@ -5,7 +5,7 @@ import json
 import requests
 
 app = Flask(__name__)
-SERVER_HOST = '192.168.162.179'
+SERVER_HOST = '192.168.162.179' 
 SERVER_PORT = 8000
 
 
@@ -94,6 +94,7 @@ def infix_to_rpn(expression):
     return rpn
 
 def is_syntax_valid(expr):
+    # 判断表示式语法是否正确
     expr = expr.replace(' ', '')  # 去除空格
     if not expr:
         return False
@@ -135,6 +136,7 @@ def is_syntax_valid(expr):
 
 
 def send_to_server(data):
+    # 向计算端发送数据以及接收数据
     try:
         url = f"http://{SERVER_HOST}:{SERVER_PORT}/calc"  # 根路径 POST
         headers = {"Content-Type": "application/json"}
@@ -150,24 +152,23 @@ def calculate():
     try:
         data = request.get_json()
 
-        if not data or 'expression' not in data:
-            return jsonify({"error": "Invalid JSON format"})
+        if not data or 'expression' not in data:  # 判断表达式是否为空
+            return jsonify({"error": "无效 JSON 数据"})
 
 
         original_expr = data['expression']
 
-        if not is_valid_expression(original_expr):
-            return jsonify({"error": "Invalid expression (括号不匹配)"})
+        if not is_valid_expression(original_expr):  # 判断括号是否匹配
+            return jsonify({"error": "错误表达式 (括号不匹配)"})
 
-        if not is_syntax_valid(original_expr):
-            return jsonify({"error": "Invalid expression syntax (语法错误)"})
+        if not is_syntax_valid(original_expr):  # 判断表达式语法是否正确
+            return jsonify({"error": "表达式语法错误"})
 
 
         rpn = infix_to_rpn(original_expr)
 
-        # 转发到C计算端
         result = send_to_server({"expression": rpn})
- 
+
         if result.get('success'):
             # 计算成功，获取结果
             value = result.get('result')
