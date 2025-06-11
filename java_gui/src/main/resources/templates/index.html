@@ -28,6 +28,13 @@
             color: #34495e;
         }
 
+        .expression {
+            font-size: 18px;
+            color: #34495e;
+            margin-bottom: 10px;
+            text-align: right;
+        }
+
         input[type=text] {
             width: 100%;
             font-size: 24px;
@@ -79,6 +86,8 @@
 <div class="calculator">
     <h2>Calculator</h2>
     <form method="post" th:action="@{/calculate}">
+        <div class="expression" id="currentExpression"></div> <!-- 当前表达式显示区域 -->
+
         <input type="text" id="expression" name="expression" placeholder="请输入表达式，如 sin(30)" required>
 
         <div class="top-buttons">
@@ -122,6 +131,7 @@
 
 <script>
     const input = document.getElementById('expression');
+    const currentExpression = document.getElementById('currentExpression');
 
     function append(val) {
         input.value += val;
@@ -129,6 +139,7 @@
 
     function clearInput() {
         input.value = '';
+        currentExpression.textContent = ''; // 清除当前表达式
     }
 
     function delChar() {
@@ -140,6 +151,7 @@
         event.preventDefault(); // 阻止表单提交
 
         const expression = input.value;
+        currentExpression.textContent = expression; // 显示当前表达式
 
         // 使用fetch发送请求
         fetch('/calculate', {
@@ -153,7 +165,7 @@
         .then(data => {
             if (data.result) {
                 // 将结果填充到输入框中
-                input.value = data.result;
+                input.value = data.result; // 显示计算结果
             } else {
                 // 显示错误信息
                 alert('错误：' + data.error);
@@ -164,6 +176,7 @@
         });
     });
 
+    // 监听回车键，提交表单
     input.addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
             this.form.submit();
