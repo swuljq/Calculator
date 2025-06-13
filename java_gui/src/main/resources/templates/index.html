@@ -71,6 +71,7 @@
             text-align: center;
             font-size: 18px;
             margin-top: 10px;
+            display: none;
         }
 
         .error {
@@ -85,8 +86,8 @@
 <body>
 <div class="calculator">
     <h2>Calculator</h2>
-    <form method="post" th:action="@{/calculate}">
-        <div class="expression" id="currentExpression"></div> <!-- 当前表达式显示区域 -->
+    <form method="post">
+        <div class="expression" id="currentExpression"></div>
 
         <input type="text" id="expression" name="expression" placeholder="请输入表达式，如 sin(30)" required>
 
@@ -125,13 +126,16 @@
         </div>
     </form>
 
-    <p class="result" th:if="${result != null}">结果：<span th:text="${result}"></span></p>
-    <p class="error" th:if="${error != null}">错误：<span th:text="${error}"></span></p>
+    <!-- 用于显示结果或错误 -->
+    <p class="result" id="resultText">结果：<span></span></p>
+    <p class="error" id="errorText">错误：<span></span></p>
 </div>
 
 <script>
     const input = document.getElementById('expression');
     const currentExpression = document.getElementById('currentExpression');
+    const resultElem = document.getElementById('resultText');
+    const errorElem = document.getElementById('errorText');
 
     function append(val) {
         input.value += val;
@@ -139,47 +143,57 @@
 
     function clearInput() {
         input.value = '';
-        currentExpression.textContent = ''; // 清除当前表达式
+        currentExpression.textContent = '';
+        hideMessages();
     }
 
     function delChar() {
         input.value = input.value.slice(0, -1);
     }
 
-    // 提交表单时通过AJAX请求计算
-    document.querySelector('form').addEventListener('submit', function(event) {
-        event.preventDefault(); // 阻止表单提交
+    function hideMessages() {
+        resultElem.style.display = 'none';
+        errorElem.style.display = 'none';
+    }
+
+    document.querySelector('form').addEventListener('submit', function (event) {
+        event.preventDefault(); // 阻止默认提交
 
         const expression = input.value;
-        currentExpression.textContent = expression; // 显示当前表达式
+        currentExpression.textContent = expression;
+        hideMessages();
 
-        // 使用fetch发送请求
         fetch('/calculate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: new URLSearchParams({ expression })
+            body: new URLSearchParams({expression})
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.result) {
-                // 将结果填充到输入框中
-                input.value = data.result; // 显示计算结果
-            } else {
-                // 显示错误信息
-                alert('错误：' + data.error);
-            }
-        })
-        .catch(error => {
-            alert('请求失败，请稍后再试！');
-        });
+            .then(response => response.json())
+            .then(data => {
+                if (data.result) {
+                    resultElem.querySelector('span').textContent = data.result;
+                    resultElem.style.display = 'block';
+                    input.value = data.result;
+                } else if (data.error) {
+                    errorElem.querySelector('span').textContent = data.error;
+                    errorElem.style.display = 'block';
+                } else {
+                    errorElem.querySelector('span').textContent = '未知错误';
+                    errorElem.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                errorElem.querySelector('span').textContent = '请求失败，请稍后再试！';
+                errorElem.style.display = 'block';
+            });
     });
 
-    // 监听回车键，提交表单
-    input.addEventListener("keydown", function(event) {
+    input.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
-            this.form.submit();
+            event.preventDefault();
+            this.form.dispatchEvent(new Event('submit'));
         }
     });
 </script>

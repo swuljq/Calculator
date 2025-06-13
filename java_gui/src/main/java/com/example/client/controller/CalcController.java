@@ -8,11 +8,28 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 
+
+
 @Controller
 public class CalcController {
 
     @PostMapping("/calculate")
-    public String calculate(@RequestParam String expression, Model model) {
+    @ResponseBody
+    public Map<String, String> calculate(@RequestParam String expression) {
+        // 模拟开关
+        boolean useMock = true;
+
+        if (useMock) {
+            Map<String, String> mock = new HashMap<>();
+            if (expression.contains("0")) {
+                mock.put("error", "模拟错误：表达式不能包含0");
+            } else {
+                mock.put("result", "模拟结果：" + expression + " = 42");
+            }
+            return mock;
+        }
+
+        // 如果 useMock 为 false，执行真实后端调用逻辑
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://localhost:8081/calculate";
 
@@ -25,15 +42,12 @@ public class CalcController {
 
         try {
             ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
-            if (response.getBody().containsKey("result")) {
-                model.addAttribute("result", response.getBody().get("result"));
-            } else {
-                model.addAttribute("error", response.getBody().get("error"));
-            }
+            return response.getBody();
         } catch (Exception e) {
-            model.addAttribute("error", "连接服务器失败或表达式无效");
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "连接服务器失败或表达式无效");
+            return error;
         }
-        return "index";
     }
 
     @GetMapping("/")
