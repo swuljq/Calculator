@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>超级计算器</title>
     <style>
+        /* 页面整体样式设置 */
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to right, #d7e1ec, #f1f7fc);
@@ -71,7 +72,7 @@
             text-align: center;
             font-size: 18px;
             margin-top: 10px;
-            display: none;
+            display: none;  /* 默认隐藏 */
         }
 
         .error {
@@ -87,10 +88,13 @@
 <div class="calculator">
     <h2>Calculator</h2>
     <form method="post">
+        <!-- 显示当前表达式 -->
         <div class="expression" id="currentExpression"></div>
 
+        <!-- 输入框 -->
         <input type="text" id="expression" name="expression" placeholder="请输入表达式，如 sin(30)" required>
 
+        <!-- 三角函数等快捷按钮 -->
         <div class="top-buttons">
             <button type="button" onclick="append('sin(')">sin</button>
             <button type="button" onclick="append('cos(')">cos</button>
@@ -98,6 +102,7 @@
             <button type="button" onclick="append('^')">^</button>
         </div>
 
+        <!-- 数字与运算符按钮 -->
         <div class="buttons">
             <button type="button" onclick="append('7')">7</button>
             <button type="button" onclick="append('8')">8</button>
@@ -116,7 +121,7 @@
 
             <button type="button" onclick="append('0')">0</button>
             <button type="button" onclick="append('.')">.</button>
-            <button type="submit">=</button>
+            <button type="submit">=</button> <!-- 提交计算 -->
             <button type="button" onclick="append('+')">+</button>
 
             <button type="button" onclick="append('(')">(</button>
@@ -126,8 +131,9 @@
         </div>
     </form>
 
-    <!-- 用于显示结果或错误 -->
+    <!-- 显示计算结果 -->
     <p class="result" id="resultText">结果：<span></span></p>
+    <!-- 显示错误信息 -->
     <p class="error" id="errorText">错误：<span></span></p>
 </div>
 
@@ -137,32 +143,38 @@
     const resultElem = document.getElementById('resultText');
     const errorElem = document.getElementById('errorText');
 
+    // 向输入框添加字符
     function append(val) {
         input.value += val;
     }
 
+    // 清空输入
     function clearInput() {
         input.value = '';
         currentExpression.textContent = '';
-        hideMessages();
+        hideMessages(); // 清除显示
     }
 
+    // 删除最后一个字符
     function delChar() {
         input.value = input.value.slice(0, -1);
     }
 
+    // 隐藏结果与错误提示
     function hideMessages() {
         resultElem.style.display = 'none';
         errorElem.style.display = 'none';
     }
 
+    // 拦截表单提交，使用 fetch 发起 AJAX 请求
     document.querySelector('form').addEventListener('submit', function (event) {
-        event.preventDefault(); // 阻止默认提交
+        event.preventDefault(); // 防止页面刷新
 
         const expression = input.value;
         currentExpression.textContent = expression;
         hideMessages();
 
+        // 发起 POST 请求
         fetch('/calculate', {
             method: 'POST',
             headers: {
@@ -170,26 +182,27 @@
             },
             body: new URLSearchParams({expression})
         })
-            .then(response => response.json())
-            .then(data => {
-                if (data.result) {
-                    resultElem.querySelector('span').textContent = data.result;
-                    resultElem.style.display = 'block';
-                    input.value = data.result;
-                } else if (data.error) {
-                    errorElem.querySelector('span').textContent = data.error;
-                    errorElem.style.display = 'block';
-                } else {
-                    errorElem.querySelector('span').textContent = '未知错误';
-                    errorElem.style.display = 'block';
-                }
-            })
-            .catch(error => {
-                errorElem.querySelector('span').textContent = '请求失败，请稍后再试！';
+        .then(response => response.json())
+        .then(data => {
+            if (data.result) {
+                resultElem.querySelector('span').textContent = data.result;
+                resultElem.style.display = 'block';
+                input.value = data.result; // 显示计算结果
+            } else if (data.error) {
+                errorElem.querySelector('span').textContent = data.error;
                 errorElem.style.display = 'block';
-            });
+            } else {
+                errorElem.querySelector('span').textContent = '未知错误';
+                errorElem.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            errorElem.querySelector('span').textContent = '请求失败，请稍后再试！';
+            errorElem.style.display = 'block';
+        });
     });
 
+    // 支持按回车键提交
     input.addEventListener("keydown", function (event) {
         if (event.key === "Enter") {
             event.preventDefault();
