@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>超级计算器</title>
     <style>
-        /* 页面整体样式设置 */
+        /* 页面整体样式 */
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to right, #d7e1ec, #f1f7fc);
@@ -14,7 +14,6 @@
             height: 100vh;
             margin: 0;
         }
-
         .calculator {
             background: white;
             padding: 30px 20px;
@@ -22,108 +21,61 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
             width: 350px;
         }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #34495e;
-        }
-
-        .expression {
-            font-size: 18px;
-            color: #34495e;
-            margin-bottom: 10px;
-            text-align: right;
-        }
-
+        h2 { text-align: center; margin-bottom: 20px; color: #34495e; }
+        .expression { font-size: 18px; color: #34495e; margin-bottom: 10px; text-align: right; }
         input[type=text] {
-            width: 100%;
-            font-size: 24px;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 2px solid #bdc3c7;
-            border-radius: 10px;
-            box-sizing: border-box;
+            width: 100%; font-size: 24px; padding: 12px;
+            margin-bottom: 15px; border: 2px solid #bdc3c7;
+            border-radius: 10px; box-sizing: border-box;
         }
-
         .top-buttons, .buttons {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 10px; margin-bottom: 15px;
         }
-
-        .buttons button, .top-buttons button {
-            padding: 15px;
-            font-size: 18px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
+        button {
+            padding: 15px; font-size: 18px;
+            background-color: #3498db; color: white;
+            border: none; border-radius: 10px;
+            cursor: pointer; transition: background-color 0.2s ease;
         }
-
-        .buttons button:hover, .top-buttons button:hover {
-            background-color: #2980b9;
-        }
-
+        button:hover { background-color: #2980b9; }
         .result, .error {
-            text-align: center;
-            font-size: 18px;
-            margin-top: 10px;
-            display: none;  /* 默认隐藏 */
+            text-align: center; font-size: 18px;
+            margin-top: 10px; display: none;
         }
-
-        .error {
-            color: red;
-        }
-
-        .result {
-            color: #2ecc71;
-        }
+        .result { color: #2ecc71; }
+        .error  { color: red; }
     </style>
 </head>
 <body>
 <div class="calculator">
     <h2>Calculator</h2>
-    <form method="post">
-        <!-- 显示当前表达式 -->
+    <form>
         <div class="expression" id="currentExpression"></div>
-
-        <!-- 输入框 -->
         <input type="text" id="expression" name="expression" placeholder="请输入表达式，如 sin(30)" required>
-
-        <!-- 三角函数等快捷按钮 -->
         <div class="top-buttons">
             <button type="button" onclick="append('sin(')">sin</button>
             <button type="button" onclick="append('cos(')">cos</button>
             <button type="button" onclick="append('tan(')">tan</button>
             <button type="button" onclick="append('^')">^</button>
         </div>
-
-        <!-- 数字与运算符按钮 -->
         <div class="buttons">
             <button type="button" onclick="append('7')">7</button>
             <button type="button" onclick="append('8')">8</button>
             <button type="button" onclick="append('9')">9</button>
             <button type="button" onclick="append('/')">÷</button>
-
             <button type="button" onclick="append('4')">4</button>
             <button type="button" onclick="append('5')">5</button>
             <button type="button" onclick="append('6')">6</button>
             <button type="button" onclick="append('*')">×</button>
-
             <button type="button" onclick="append('1')">1</button>
             <button type="button" onclick="append('2')">2</button>
             <button type="button" onclick="append('3')">3</button>
             <button type="button" onclick="append('-')">-</button>
-
             <button type="button" onclick="append('0')">0</button>
             <button type="button" onclick="append('.')">.</button>
-            <button type="submit">=</button> <!-- 提交计算 -->
+            <button type="submit">=</button>
             <button type="button" onclick="append('+')">+</button>
-
             <button type="button" onclick="append('(')">(</button>
             <button type="button" onclick="append(')')">)</button>
             <button type="button" onclick="clearInput()">C</button>
@@ -131,79 +83,67 @@
         </div>
     </form>
 
-    <!-- 显示计算结果 -->
     <p class="result" id="resultText">结果：<span></span></p>
-    <!-- 显示错误信息 -->
-    <p class="error" id="errorText">错误：<span></span></p>
+    <p class="error"  id="errorText">错误：<span></span></p>
 </div>
 
 <script>
     const input = document.getElementById('expression');
     const currentExpression = document.getElementById('currentExpression');
     const resultElem = document.getElementById('resultText');
-    const errorElem = document.getElementById('errorText');
+    const errorElem  = document.getElementById('errorText');
 
-    // 向输入框添加字符
-    function append(val) {
-        input.value += val;
-    }
-
-    // 清空输入
+    function append(val) { input.value += val; }
     function clearInput() {
         input.value = '';
         currentExpression.textContent = '';
-        hideMessages(); // 清除显示
+        hideMessages();
     }
-
-    // 删除最后一个字符
-    function delChar() {
-        input.value = input.value.slice(0, -1);
-    }
-
-    // 隐藏结果与错误提示
+    function delChar() { input.value = input.value.slice(0, -1); }
     function hideMessages() {
         resultElem.style.display = 'none';
-        errorElem.style.display = 'none';
+        errorElem.style.display  = 'none';
     }
 
-    // 拦截表单提交，使用 fetch 发起 AJAX 请求
-    document.querySelector('form').addEventListener('submit', function (event) {
-        event.preventDefault(); // 防止页面刷新
+    // 将显示逻辑提取成函数，方便手动调用
+    function showCalcResult(data) {
+        hideMessages();
+        if (data.result !== undefined) {
+            resultElem.querySelector('span').textContent = data.result;
+            resultElem.style.display = 'block';
+            input.value = data.result;  // 只写回“结果”
+        } else if (data.error) {
+            errorElem.querySelector('span').textContent = data.error;
+            errorElem.style.display = 'block';
+        }
+    }
 
-        const expression = input.value;
-        currentExpression.textContent = expression;
+    // 1. 在此处可注释／取消注释以下两行，手动切换“成功”或“失败”模拟：
+    // ------------------------------------------------------------
+    // window.fetch = () => Promise.resolve({ json: () => Promise.resolve({ result: 5.0 }) });
+    // window.fetch = () => Promise.resolve({ json: () => Promise.resolve({ error: "测试错误" }) });
+    // ------------------------------------------------------------
+
+    document.querySelector('form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const expr = input.value;
+        currentExpression.textContent = expr;
         hideMessages();
 
-        // 发起 POST 请求
         fetch('/calculate', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({expression})
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ expression: expr })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.result) {
-                resultElem.querySelector('span').textContent = data.result;
-                resultElem.style.display = 'block';
-                input.value = data.result; // 显示计算结果
-            } else if (data.error) {
-                errorElem.querySelector('span').textContent = data.error;
-                errorElem.style.display = 'block';
-            } else {
-                errorElem.querySelector('span').textContent = '未知错误';
-                errorElem.style.display = 'block';
-            }
-        })
-        .catch(error => {
-            errorElem.querySelector('span').textContent = '请求失败，请稍后再试！';
-            errorElem.style.display = 'block';
+        .then(res => res.json())
+        .then(showCalcResult)
+        .catch(() => {
+            showCalcResult({ error: '请求失败，请稍后再试！' });
         });
     });
 
-    // 支持按回车键提交
-    input.addEventListener("keydown", function (event) {
+    // 支持回车提交
+    input.addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
             event.preventDefault();
             this.form.dispatchEvent(new Event('submit'));
