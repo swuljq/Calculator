@@ -4,78 +4,123 @@
     <meta charset="UTF-8">
     <title>超级计算器</title>
     <style>
-        /* 页面整体样式 */
+        /* 设置页面的基本样式 */
         body {
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to right, #d7e1ec, #f1f7fc);
+            background: linear-gradient(to right, #d7e1ec, #f1f7fc); /* 背景渐变效果 */
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 100vh; /* 让页面居中显示 */
             margin: 0;
         }
+
         .calculator {
             background: white;
             padding: 30px 20px;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            width: 350px;
+            border-radius: 20px; /* 设置圆角 */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* 设置阴影效果 */
+            width: 350px; /* 设置计算器宽度 */
         }
-        h2 { text-align: center; margin-bottom: 20px; color: #34495e; }
-        .expression { font-size: 18px; color: #34495e; margin-bottom: 10px; text-align: right; }
+
+        h2 {
+            text-align: center; /* 标题居中 */
+            margin-bottom: 20px;
+            color: #34495e; /* 设置标题颜色 */
+        }
+
+        /* 输入框样式 */
         input[type=text] {
-            width: 100%; font-size: 24px; padding: 12px;
-            margin-bottom: 15px; border: 2px solid #bdc3c7;
-            border-radius: 10px; box-sizing: border-box;
+            width: 100%;
+            font-size: 24px; /* 设置字体大小 */
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #bdc3c7; /* 设置边框颜色 */
+            border-radius: 10px; /* 设置圆角 */
+            box-sizing: border-box;
         }
+
+        /* 顶部按钮区域 */
         .top-buttons, .buttons {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 10px; margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 每行4个按钮 */
+            gap: 10px; /* 设置按钮间距 */
+            margin-bottom: 15px;
         }
-        button {
-            padding: 15px; font-size: 18px;
-            background-color: #3498db; color: white;
-            border: none; border-radius: 10px;
-            cursor: pointer; transition: background-color 0.2s ease;
+
+        /* 按钮样式 */
+        .buttons button, .top-buttons button {
+            padding: 15px;
+            font-size: 18px; /* 设置按钮字体大小 */
+            background-color: #3498db; /* 设置按钮背景颜色 */
+            color: white;
+            border: none;
+            border-radius: 10px; /* 设置按钮圆角 */
+            cursor: pointer;
+            transition: background-color 0.2s ease; /* 设置按钮点击效果 */
         }
-        button:hover { background-color: #2980b9; }
+
+        /* 按钮悬停效果 */
+        .buttons button:hover, .top-buttons button:hover {
+            background-color: #2980b9; /* 按钮悬停时的背景色 */
+        }
+
+        /* 显示计算结果和错误的区域 */
         .result, .error {
-            text-align: center; font-size: 18px;
-            margin-top: 10px; display: none;
+            text-align: center; /* 文字居中 */
+            font-size: 18px;
+            margin-top: 10px;
         }
-        .result { color: #2ecc71; }
-        .error  { color: red; }
+
+        /* 错误信息样式 */
+        .error {
+            color: red;
+        }
+
+        /* 结果信息样式 */
+        .result {
+            color: #2ecc71; /* 绿色显示计算结果 */
+        }
     </style>
 </head>
 <body>
 <div class="calculator">
     <h2>Calculator</h2>
-    <form>
-        <div class="expression" id="currentExpression"></div>
+    <!-- 表单提交部分，计算表达式 -->
+    <form method="post" th:action="@{/calculate}">
+        <!-- 输入框用于输入数学表达式 -->
         <input type="text" id="expression" name="expression" placeholder="请输入表达式，如 sin(30)" required>
+
+        <!-- 顶部按钮，用于输入数学函数 -->
         <div class="top-buttons">
             <button type="button" onclick="append('sin(')">sin</button>
             <button type="button" onclick="append('cos(')">cos</button>
             <button type="button" onclick="append('tan(')">tan</button>
             <button type="button" onclick="append('^')">^</button>
         </div>
+
+        <!-- 主按钮区域，用于输入数字和运算符 -->
         <div class="buttons">
             <button type="button" onclick="append('7')">7</button>
             <button type="button" onclick="append('8')">8</button>
             <button type="button" onclick="append('9')">9</button>
             <button type="button" onclick="append('/')">÷</button>
+
             <button type="button" onclick="append('4')">4</button>
             <button type="button" onclick="append('5')">5</button>
             <button type="button" onclick="append('6')">6</button>
             <button type="button" onclick="append('*')">×</button>
+
             <button type="button" onclick="append('1')">1</button>
             <button type="button" onclick="append('2')">2</button>
             <button type="button" onclick="append('3')">3</button>
             <button type="button" onclick="append('-')">-</button>
+
             <button type="button" onclick="append('0')">0</button>
             <button type="button" onclick="append('.')">.</button>
             <button type="submit">=</button>
             <button type="button" onclick="append('+')">+</button>
+
             <button type="button" onclick="append('(')">(</button>
             <button type="button" onclick="append(')')">)</button>
             <button type="button" onclick="clearInput()">C</button>
@@ -83,70 +128,48 @@
         </div>
     </form>
 
-    <p class="result" id="resultText">结果：<span></span></p>
-    <p class="error"  id="errorText">错误：<span></span></p>
+    <!-- 显示计算结果 -->
+    <p class="result" th:if="${result != null}">结果：<span th:text="${result}"></span></p>
+    <!-- 显示错误信息 -->
+    <p class="error" th:if="${error != null}">错误：<span th:text="${error}"></span></p>
 </div>
 
 <script>
+    // 获取输入框
     const input = document.getElementById('expression');
-    const currentExpression = document.getElementById('currentExpression');
-    const resultElem = document.getElementById('resultText');
-    const errorElem  = document.getElementById('errorText');
 
-    function append(val) { input.value += val; }
+    // 添加输入内容到输入框中
+    function append(val) {
+        input.value += val;
+    }
+
+    // 清空输入框
     function clearInput() {
         input.value = '';
-        currentExpression.textContent = '';
-        hideMessages();
-    }
-    function delChar() { input.value = input.value.slice(0, -1); }
-    function hideMessages() {
-        resultElem.style.display = 'none';
-        errorElem.style.display  = 'none';
     }
 
-    // 将显示逻辑提取成函数，方便手动调用
-    function showCalcResult(data) {
-        hideMessages();
-        if (data.result !== undefined) {
-            resultElem.querySelector('span').textContent = data.result;
-            resultElem.style.display = 'block';
-            input.value = data.result;  // 只写回“结果”
-        } else if (data.error) {
-            errorElem.querySelector('span').textContent = data.error;
-            errorElem.style.display = 'block';
-        }
+    // 删除输入框中的最后一个字符
+    function delChar() {
+        input.value = input.value.slice(0, -1);
     }
 
-    // 1. 在此处可注释／取消注释以下两行，手动切换“成功”或“失败”模拟：
-    // ------------------------------------------------------------
-    // window.fetch = () => Promise.resolve({ json: () => Promise.resolve({ result: 5.0 }) });
-    // window.fetch = () => Promise.resolve({ json: () => Promise.resolve({ error: "测试错误" }) });
-    // ------------------------------------------------------------
-
-    document.querySelector('form').addEventListener('submit', function(event) {
-        event.preventDefault();
-        const expr = input.value;
-        currentExpression.textContent = expr;
-        hideMessages();
-
-        fetch('/calculate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ expression: expr })
-        })
-        .then(res => res.json())
-        .then(showCalcResult)
-        .catch(() => {
-            showCalcResult({ error: '请求失败，请稍后再试！' });
-        });
+    // 保存最后的输入表达式到本地存储
+    document.querySelector('form').addEventListener('submit', function() {
+        localStorage.setItem('lastExpression', input.value);
     });
 
-    // 支持回车提交
+    // 页面加载时恢复上次的输入表达式
+    window.addEventListener('load', function() {
+        const lastExpr = localStorage.getItem('lastExpression');
+        if(lastExpr) {
+            input.value = lastExpr; // 恢复输入框内容
+        }
+    });
+
+    // 按下回车键时提交表单
     input.addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
-            event.preventDefault();
-            this.form.dispatchEvent(new Event('submit'));
+            this.form.submit();
         }
     });
 </script>
