@@ -5,7 +5,7 @@ import json
 import requests
 
 app = Flask(__name__)
-SERVER_HOST = '192.168.162.179' 
+SERVER_HOST = '172.20.10.2' 
 SERVER_PORT = 8000
 
 
@@ -184,4 +184,4 @@ def calculate():
 
 if __name__ == '__main__':
     print("中间层服务已启动，监听端口: 8081")
-    app.run(host='localhost', port=8081, debug=True)
+    app.run(host='172.20.10.4', port=8081, debug=True)
