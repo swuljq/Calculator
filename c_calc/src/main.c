@@ -11,8 +11,10 @@ static void handle_request(struct mg_connection *c, int ev, void *ev_data)
 {
     if (ev == MG_EV_HTTP_MSG) 
     {
-        struct mg_http_message *hm = (struct mg_http_message *) ev_data;
+        
 
+        struct mg_http_message *hm = (struct mg_http_message *) ev_data;
+        printf("Received HTTP request: %.*s\n", (int)hm->uri.len, hm->uri.buf);
         if (mg_strcmp(hm->uri, mg_str("/calc")) == 0 &&
             _strnicmp(hm->method.buf, "POST", hm->method.len) == 0) 
         {
@@ -20,7 +22,7 @@ static void handle_request(struct mg_connection *c, int ev, void *ev_data)
             char *body = (char *)malloc(hm->body.len + 1);
             memcpy(body, hm->body.buf, hm->body.len);
             body[hm->body.len] = '\0';
-
+            printf("Received body: %s\n", body);
             // 解析 JSON数据
             cJSON *json = cJSON_Parse(body);
             free(body);
